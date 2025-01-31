@@ -43,6 +43,9 @@ func (r *translationRepo) List(ctx context.Context, filter TranslationFilter) ([
 	var translations []model.Translation
 	query := r.db.WithContext(ctx)
 
+	if filter.SourceText != "" {
+		query = query.Where("source_text = ?", filter.SourceText)
+	}
 	if filter.SourceLanguage != "" {
 		query = query.Where("source_language = ?", filter.SourceLanguage)
 	}
@@ -53,7 +56,7 @@ func (r *translationRepo) List(ctx context.Context, filter TranslationFilter) ([
 		query = query.Where("category = ?", filter.Category)
 	}
 
-	// Pagination
+	// Add pagination
 	if filter.Page > 0 && filter.PageSize > 0 {
 		offset := (filter.Page - 1) * filter.PageSize
 		query = query.Offset(offset).Limit(filter.PageSize)
@@ -62,5 +65,6 @@ func (r *translationRepo) List(ctx context.Context, filter TranslationFilter) ([
 	if err := query.Find(&translations).Error; err != nil {
 		return nil, err
 	}
+
 	return translations, nil
 } 

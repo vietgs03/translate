@@ -8,7 +8,10 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/vietgs03/translate/backend/internal/config"
 	"github.com/redis/go-redis/v9"
+	"github.com/vietgs03/translate/backend/internal/service/translator"
 )
+
+var _ translator.Translator = (*Client)(nil) // Verify interface implementation
 
 type Client struct {
 	client      *openai.Client
@@ -60,4 +63,10 @@ func (c *Client) Translate(ctx context.Context, text, sourceLang, targetLang str
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+// Add Close method to satisfy Translator interface
+func (c *Client) Close() error {
+	// OpenAI client doesn't need cleanup
+	return nil
 } 

@@ -6,14 +6,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/vietgs03/translate/backend/internal/errors"
+	"github.com/vietgs03/translate/backend/internal/types"
 )
-
-type JWTClaims struct {
-	UserID   uint   `json:"user_id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	jwt.RegisteredClaims
-}
 
 func JWTAuth(secretKey string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -27,7 +21,7 @@ func JWTAuth(secretKey string) fiber.Handler {
 			return errors.NewUnauthorizedError("invalid token format")
 		}
 
-		token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &types.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secretKey), nil
 		})
 
@@ -35,7 +29,7 @@ func JWTAuth(secretKey string) fiber.Handler {
 			return errors.NewUnauthorizedError("invalid token: %v", err)
 		}
 
-		claims, ok := token.Claims.(*JWTClaims)
+		claims, ok := token.Claims.(*types.JWTClaims)
 		if !ok || !token.Valid {
 			return errors.NewUnauthorizedError("invalid token claims")
 		}
@@ -48,7 +42,7 @@ func JWTAuth(secretKey string) fiber.Handler {
 
 func RequireRole(roles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		user, ok := c.Locals("user").(*JWTClaims)
+		user, ok := c.Locals("user").(*types.JWTClaims)
 		if !ok {
 			return errors.NewUnauthorizedError("user not authenticated")
 		}

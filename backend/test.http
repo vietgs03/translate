@@ -1,0 +1,65 @@
+### Health Check
+GET http://localhost:8080/api/v1/public/health
+Accept: application/json
+
+### Register New User
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+}
+
+### Login
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "password123"
+}
+
+### Create Translation (Protected - Requires Auth)
+POST http://localhost:8080/api/v1/translations
+Content-Type: application/json
+Authorization: Bearer <token_from_login>
+
+{
+    "source_text": "Hello, how are you?",
+    "source_language": "en",
+    "target_language": "vi",
+    "category": "greeting"
+}
+
+### Get Translation by ID
+GET http://localhost:8080/api/v1/translations/1
+Authorization: Bearer <token_from_login>
+
+### List Translations
+GET http://localhost:8080/api/v1/translations?page=1&page_size=10
+Authorization: Bearer <token_from_login>
+
+### Update Translation
+PUT http://localhost:8080/api/v1/translations/1
+Content-Type: application/json
+Authorization: Bearer <token_from_login>
+
+{
+    "translated_text": "Xin chào, bạn khỏe không?",
+    "category": "greeting"
+}
+
+### Delete Translation
+DELETE http://localhost:8080/api/v1/translations/1
+Authorization: Bearer <token_from_login>
+
+### Update User Role (Requires Admin)
+PUT http://localhost:8080/api/v1/admin/users/1/role
+Content-Type: application/json
+Authorization: Bearer <token_from_login>
+
+{
+    "role": "admin"
+} 

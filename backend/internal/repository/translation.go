@@ -15,6 +15,7 @@ type TranslationRepository interface {
 }
 
 type TranslationFilter struct {
+	SourceText     string
 	SourceLanguage string
 	TargetLanguage string
 	Category       string

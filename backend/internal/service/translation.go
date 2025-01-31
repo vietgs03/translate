@@ -21,7 +21,7 @@ type CreateTranslationInput struct {
 	TargetLanguage string `json:"target_language" validate:"required,len=2"`
 	Context        string `json:"context" validate:"omitempty,max=500"`
 	Category       string `json:"category" validate:"omitempty,max=50"`
-	CreatedBy      string `json:"created_by" validate:"required"`
+	CreatedBy      string `json:"-"`
 }
 
 type UpdateTranslationInput struct {

@@ -13,6 +13,7 @@ type Config struct {
 	Redis      RedisConfig
 	OpenAI     OpenAIConfig
 	JWT        JWTConfig
+	Google     GoogleConfig
 }
 
 type DatabaseConfig struct {
@@ -39,6 +40,12 @@ type JWTConfig struct {
 	ExpiresIn int    `env:"JWT_EXPIRES_IN" default:"24"` // hours
 }
 
+type GoogleConfig struct {
+	ProjectID         string `env:"GOOGLE_PROJECT_ID"`
+	CredentialsFile   string `env:"GOOGLE_APPLICATION_CREDENTIALS"`
+	GeminiAPIKey      string `env:"GOOGLE_GEMINI_API_KEY"`
+}
+
 func LoadConfig() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
 		// Don't return error if .env file doesn't exist
@@ -48,6 +55,11 @@ func LoadConfig() (*Config, error) {
 	redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
 	if err != nil {
 		redisDB = 0 // Use default if not set or invalid
+	}
+
+	jwtExpiresIn, err := strconv.Atoi(getEnvWithDefault("JWT_EXPIRES_IN", "24"))
+	if err != nil {
+		jwtExpiresIn = 24 // default to 24 hours if invalid
 	}
 
 	return &Config{
@@ -71,7 +83,12 @@ func LoadConfig() (*Config, error) {
 		},
 		JWT: JWTConfig{
 			SecretKey: getEnvWithDefault("JWT_SECRET_KEY", "your-secret-key"),
-			ExpiresIn: getEnvWithDefault("JWT_EXPIRES_IN", "24"),
+			ExpiresIn: jwtExpiresIn,
+		},
+		Google: GoogleConfig{
+			ProjectID:         getEnvWithDefault("GOOGLE_PROJECT_ID", ""),
+			CredentialsFile:   getEnvWithDefault("GOOGLE_APPLICATION_CREDENTIALS", ""),
+			GeminiAPIKey:       getEnvWithDefault("GOOGLE_GEMINI_API_KEY", ""),
 		},
 	}, nil
 }

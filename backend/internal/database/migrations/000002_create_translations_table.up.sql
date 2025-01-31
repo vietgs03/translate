@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS translations (
 
 CREATE INDEX idx_translations_languages ON translations(source_language, target_language);
 CREATE INDEX idx_translations_category ON translations(category);
-CREATE INDEX idx_translations_created_at ON translations(created_at); 
+CREATE INDEX idx_translations_created_at ON translations(created_at);

@@ -10,7 +10,7 @@ import (
 	"github.com/vietgs03/translate/backend/internal/config"
 )
 
-func RunMigrations(cfg *config.DatabaseConfig) error {
+func RunMigrations(cfg *config.DatabaseConfig, direction string) error {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.User,
 		cfg.Password,
@@ -27,10 +27,17 @@ func RunMigrations(cfg *config.DatabaseConfig) error {
 		return fmt.Errorf("failed to create migrate instance: %v", err)
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("failed to run migrations: %v", err)
+	if direction == "up" {
+		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+			return fmt.Errorf("failed to run migrations up: %v", err)
+		}
+		log.Println("Database migrations up completed successfully")
+	} else {
+		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+			return fmt.Errorf("failed to run migrations down: %v", err)
+		}
+		log.Println("Database migrations down completed successfully")
 	}
 
-	log.Println("Database migrations completed successfully")
 	return nil
 } 

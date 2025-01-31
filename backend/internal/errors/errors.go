@@ -40,4 +40,11 @@ func NewDatabaseError(format string, args ...interface{}) error {
 		Type:    DatabaseErr,
 		Message: fmt.Sprintf(format, args...),
 	}
+}
+
+func NewUnauthorizedError(format string, args ...interface{}) error {
+	return AppError{
+		Type:    Unauthorized,
+		Message: fmt.Sprintf(format, args...),
+	}
 } 

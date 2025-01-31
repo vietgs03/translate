@@ -7,26 +7,26 @@ import (
 
 	"github.com/vietgs03/translate/backend/internal/errors"
 	"github.com/vietgs03/translate/backend/internal/model"
-	"github.com/vietgs03/translate/backend/internal/openai"
 	"github.com/vietgs03/translate/backend/internal/repository"
 	"github.com/vietgs03/translate/backend/internal/cache"
+	"github.com/vietgs03/translate/backend/internal/service/translator"
 )
 
 type translationService struct {
-	repo   repository.TranslationRepository
-	cache  *cache.TranslationCache
-	openai *openai.Client
+	repo       repository.TranslationRepository
+	cache      *cache.TranslationCache
+	translator translator.Translator
 }
 
 func NewTranslationService(
 	repo repository.TranslationRepository,
 	cache *cache.TranslationCache,
-	openai *openai.Client,
+	translator translator.Translator,
 ) TranslationService {
 	return &translationService{
-		repo:   repo,
-		cache:  cache,
-		openai: openai,
+		repo:       repo,
+		cache:      cache,
+		translator: translator,
 	}
 }
 
@@ -46,8 +46,8 @@ func (s *translationService) CreateTranslation(ctx context.Context, input Create
 		return existing, nil
 	}
 
-	// Get translation from OpenAI
-	translatedText, err := s.openai.Translate(ctx, input.SourceText, input.SourceLanguage, input.TargetLanguage)
+	// Get translation from translator service
+	translatedText, err := s.translator.Translate(ctx, input.SourceText, input.SourceLanguage, input.TargetLanguage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to translate text: %v", err)
 	}
@@ -122,6 +122,7 @@ func (s *translationService) ListTranslations(ctx context.Context, filter reposi
 
 func (s *translationService) findExistingTranslation(ctx context.Context, input CreateTranslationInput) (*model.Translation, error) {
 	translations, err := s.repo.List(ctx, repository.TranslationFilter{
+		SourceText:     input.SourceText,
 		SourceLanguage: input.SourceLanguage,
 		TargetLanguage: input.TargetLanguage,
 		Page:          1,

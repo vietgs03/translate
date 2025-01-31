@@ -17,10 +17,20 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 	}
 }
 
+// @Summary Register new user
+// @Description Register a new user with username, email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body service.RegisterInput true "Registration details"
+// @Success 201 {object} model.User
+// @Failure 400 {object} types.APIError
+// @Failure 500 {object} types.APIError
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var input service.RegisterInput
 	if err := c.BodyParser(&input); err != nil {
-		return err
+		return types.NewValidationError("invalid request body")
 	}
 
 	user, err := h.authService.Register(c.Context(), input)
@@ -31,6 +41,16 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
+// @Summary Login user
+// @Description Login with username and password to get JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body service.LoginInput true "Login credentials"
+// @Success 200 {object} types.LoginResponse
+// @Failure 400 {object} types.APIError
+// @Failure 401 {object} types.APIError
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var input service.LoginInput
 	if err := c.BodyParser(&input); err != nil {

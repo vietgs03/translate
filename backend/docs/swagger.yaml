@@ -1,0 +1,276 @@
+basePath: /api/v1
+definitions:
+  model.Translation:
+    properties:
+      category:
+        type: string
+      context:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      source_language:
+        type: string
+      source_text:
+        type: string
+      target_language:
+        type: string
+      translated_text:
+        type: string
+      updated_at:
+        type: string
+      votes:
+        type: integer
+    type: object
+  model.User:
+    properties:
+      active:
+        type: boolean
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  service.CreateTranslationInput:
+    properties:
+      category:
+        maxLength: 50
+        type: string
+      context:
+        maxLength: 500
+        type: string
+      source_language:
+        type: string
+      source_text:
+        maxLength: 1000
+        minLength: 1
+        type: string
+      target_language:
+        type: string
+    required:
+    - source_language
+    - source_text
+    - target_language
+    type: object
+  service.LoginInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  service.RegisterInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  types.APIError:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+  types.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    type: object
+  types.PaginatedResponse:
+    properties:
+      data: {}
+      pagination:
+        properties:
+          page:
+            example: 1
+            type: integer
+          page_size:
+            example: 10
+            type: integer
+          total:
+            example: 100
+            type: integer
+        type: object
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for translation service with role-based access control
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Translation API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with username and password to get JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIError'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, email and password
+      parameters:
+      - description: Registration details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.APIError'
+      summary: Register new user
+      tags:
+      - auth
+  /translations:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of translations with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Translation'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIError'
+      security:
+      - BearerAuth: []
+      summary: List translations
+      tags:
+      - translations
+    post:
+      consumes:
+      - application/json
+      description: Create a new translation
+      parameters:
+      - description: Translation details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateTranslationInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Translation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.APIError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.APIError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/types.APIError'
+      security:
+      - BearerAuth: []
+      summary: Create translation
+      tags:
+      - translations
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -20,6 +20,18 @@ func NewTranslationHandler(ts service.TranslationService) *TranslationHandler {
 	}
 }
 
+// @Summary Create translation
+// @Description Create a new translation
+// @Tags translations
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body service.CreateTranslationInput true "Translation details"
+// @Success 201 {object} model.Translation
+// @Failure 400 {object} types.APIError
+// @Failure 401 {object} types.APIError
+// @Failure 403 {object} types.APIError
+// @Router /translations [post]
 func (h *TranslationHandler) Create(c *fiber.Ctx) error {
 	var input service.CreateTranslationInput
 	if err := c.BodyParser(&input); err != nil {
@@ -56,6 +68,18 @@ func (h *TranslationHandler) Get(c *fiber.Ctx) error {
 	return c.JSON(translation)
 }
 
+// @Summary List translations
+// @Description Get a list of translations with pagination
+// @Tags translations
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Success 200 {object} types.PaginatedResponse{data=[]model.Translation}
+// @Failure 400 {object} types.APIError
+// @Failure 401 {object} types.APIError
+// @Router /translations [get]
 func (h *TranslationHandler) List(c *fiber.Ctx) error {
 	filter := repository.TranslationFilter{
 		SourceLanguage: c.Query("source_lang"),

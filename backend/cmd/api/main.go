@@ -19,7 +19,29 @@ import (
 	"go.uber.org/zap"
 	"github.com/vietgs03/translate/backend/internal/service/google"
 	"github.com/vietgs03/translate/backend/internal/service/translator"
+	"github.com/gofiber/swagger"
+	_ "github.com/vietgs03/translate/backend/docs" // swagger docs
 )
+
+// @title Translation API
+// @version 1.0
+// @description API for translation service with role-based access control
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 type App struct {
 	config            *config.Config
@@ -196,4 +218,10 @@ func setupRoutes(app *App) {
 		middleware.RequireRole("admin"),
 		app.translationHandler.Delete,
 	)
+
+	// Swagger documentation
+	app.fiber.Get("/swagger/*", swagger.New(swagger.Config{
+		URL: "/swagger/doc.json",
+		DeepLinking: false,
+	}))
 }
